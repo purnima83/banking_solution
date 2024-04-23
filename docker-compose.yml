@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+  account-service:
+    image: springcommunity/simple-banking-application-account-service
+    container_name: account-service
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-I", "http://account-service:8888"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+     - 8888:8888
+
+  discovery-service:
+    image: springcommunity/simple-banking-aplication-discovery-service
+    container_name: discovery-service
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://discovery-service:8761"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      config-server:
+        condition: service_healthy
+    ports:
+     - 8761:8761
+
+  customer-service:
+    image: springcommunity/simple-banking-application-customer-service
+    container_name: customer-service
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+    - 8081:8081
+
+  auth-service:
+    image: springcommunity/simple-banking-application-auth-service
+    container_name: auth-service
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+     - 8082:8082
+
+ 
+
+  gateway-service:
+    image: springcommunity/simple-banking-application-gateway-service
+    container_name: gateway-service
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+     - 8080:8080
+
+
+ 
